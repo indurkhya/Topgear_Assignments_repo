@@ -1,0 +1,104 @@
+<! DOCTYPE HTML>
+<html>
+<head>
+<meta charset = "utf-8">
+<title> Wipro HTML-L2 Assignment</title>
+</head>
+<body style="background-color:grey;">
+<script>
+function allowdrop(ev)
+{
+ev.preventDefault();
+}
+
+function drag(ev) {
+  ev.dataTransfer.setData("text", ev.target.id);
+}
+
+function drop(ev) {
+  ev.preventDefault();
+  var data = ev.dataTransfer.getData("text");
+  ev.target.appendChild(document.getElementById(data));
+}
+
+</script>
+<svg  width="200" height="200" ondragover = allowdrop(event) ondrop = drop(event) >
+  <circle cx="100" cy="100" r="80" stroke="black" stroke-width="4" fill="yellow" />
+</svg>
+<svg  width="200" height="200" ondragover = allowdrop(event) ondrop = drop(event) >
+  <circle cx="100" cy="100" r="80" stroke="black" stroke-width="4" fill="green" />
+</svg>
+<img id = "image1"src = "wipro.png" width = "100px" height="100px" draggable = "True" ondragstart = drag(event)>
+//<div id="result"></div>
+
+<script>
+
+var apiGeolocationSuccess = function(position) {
+    alert("API geolocation success!\n\nlat = " + position.coords.latitude + "\nlng = " + position.coords.longitude);
+	
+};
+
+var tryAPIGeolocation = function() {
+    jQuery.post( "https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyDCa1LUe1vOczX1hO_iGYgyo8p_jYuGOPU", function(success) {
+        apiGeolocationSuccess({coords: {latitude: success.location.lat, longitude: success.location.lng}});
+  })
+  .fail(function(err) {
+    alert("API Geolocation error! \n\n"+err);
+  });
+};
+
+var browserGeolocationSuccess = function(position) {
+    /*alert("Browser geolocation success!\n\nlat = " + position.coords.latitude + "\nlng = " + position.coords.longitude);*/
+	var locationvalue = document.getElementById("demo");
+	locationvalue.innerHTML = "New Latitude = " + position.coords.latitude + " New Longitude = " + position.coords.longitude;
+	if (typeof(Storage) !== "undefined") {
+		// Store
+		localStorage.setItem("latitude", position.coords.latitude);
+		localStorage.setItem("longitude", position.coords.longitude);
+		// Retrieve
+	} else {
+		document.getElementById("result").innerHTML = "Sorry, your browser does not support Web Storage...";
+		}
+};
+
+var browserGeolocationFail = function(error) {
+  switch (error.code) {
+    case error.TIMEOUT:
+      alert("Browser geolocation error !\n\nTimeout.");
+	  locationvalue.innerHTML = "Browser geolocation error !\n Connection Timeout.";
+      break;
+    case error.PERMISSION_DENIED:
+      if(error.message.indexOf("Only secure origins are allowed") == 0) {
+        tryAPIGeolocation();
+      }
+      break;
+    case error.POSITION_UNAVAILABLE:
+      alert("Browser geolocation error !\n\nPosition unavailable.");
+	  locationvalue.innerHTML = "Browser geolocation error !\n Position unavailable.";
+      break;
+  }
+};
+
+var tryGeolocation = function() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+        browserGeolocationSuccess,
+      browserGeolocationFail,
+      {maximumAge: 50000, timeout: 20000, enableHighAccuracy: true});
+  }
+};
+
+window.onload = function() {
+  document.getElementById("result").innerHTML = "Old Latitude = " + localStorage.getItem("latitude")+  " Old Longitude = " + localStorage.getItem("longitude") ;
+};
+
+
+</script>
+
+<p id = "result"> Saved Location will be displayed above<p>
+<p id = "demo"> New Location will be displayed here<p>
+<button onclick=" tryGeolocation()">CLICK TO GET LOCATION</button>
+
+</body>
+</html>
+<head>
